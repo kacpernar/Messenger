@@ -6,12 +6,19 @@ namespace Messenger
     [ApiController]
     public class MessageController : ControllerBase
     {
+        private readonly IMessageProducer _messageProducer;
+
+        public MessageController(IMessageProducer messageProducer)
+        {
+            _messageProducer = messageProducer;
+        }
         [HttpPost]
-        public IActionResult SendMessage(string message)
+        public async Task<IActionResult> SendMessage(string message)
         {
             try
             {
-                return Ok(message);
+                _messageProducer.SendMessage(message);
+                return Ok();
             }
             catch (Exception e)
             {
