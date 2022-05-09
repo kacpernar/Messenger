@@ -22,16 +22,16 @@
     else
     {
         <div class="msg">
-                <div class="name name-left">@message.UserName</div>
-                <div class="bubble sender middle" @onclick="showDeleteButtons">
-                    <div>@message.Text</div>
-                </div>
+            <div class="name name-left">@message.UserName</div>
+            <div class="bubble sender middle" @onclick="() => { message.DeleteButtonsVisibility = !message.DeleteButtonsVisibility; }">
+                <div>@message.Text</div>
+            </div>
         </div>
-        if (deleteButtonsVisible)
+        if (message.DeleteButtonsVisibility)
         {
             <div class="rm-btns">
-                <button class="btn rm-btn">Usuń</button>
-                <button class="btn rm-btn">Usuń u wszystkich</button>
+                <button class="btn rm-btn" @onclick="async() => await MessageHolder.DeleteMessage(message)">Usuń</button>
+                <button class="btn rm-btn" @onclick="async() => await DeleteMessageToEveryone(message)">Usuń u wszystkich</button>
             </div> 
         }
 
@@ -39,7 +39,7 @@
 }
 
 <input class="inpt" @bind="Text" />
-<button class="btn btn-primary" @onclick="IncrementCount">Send</button>
+<button class="btn btn-primary" @onclick="SendMessage">Send</button>
 
 </section>
 
@@ -47,11 +47,9 @@
 
     private string? Text { get; set; }
 
-    private bool deleteButtonsVisible { get; set; }
-
     private List<string> _messages = new();
 
-    private void IncrementCount()
+    private void SendMessage()
     {
         if(Text != null)
             MessageProducer.SendMessage(new Message()
@@ -61,8 +59,13 @@
             });
     }
 
-    private void showDeleteButtons(){
-
-        deleteButtonsVisible = !deleteButtonsVisible;
+    private async Task DeleteMessageToEveryone(Message message)
+    {
+        await MessageHolder.DeleteMessage(message);
+        MessageProducer.SendMessage(new Message()
+        {
+            Id = message.Id,
+            DeleteMessage = true
+        });
     }
 }

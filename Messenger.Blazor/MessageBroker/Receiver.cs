@@ -36,12 +36,19 @@ public class Receiver : IHostedService
             var body = ea.Body.ToArray();
             var jsonString = Encoding.UTF8.GetString(body);
             var message = JsonSerializer.Deserialize<Message>(jsonString);
-            _messageHolder.MessageList.Add(new Message()
+            if (message == null) return;
+            if (message.DeleteMessage)
             {
-                Text = message.Text,
-                UserName = message.UserName
-            });
-            
+                var messageToDelete = _messageHolder.MessageList.Find(m => m.Id == message.Id);
+                if (messageToDelete != null)
+                {
+                    _messageHolder.DeleteMessage(messageToDelete);
+                }
+            }
+            else
+            {
+                _messageHolder.MessageList.Add(message);
+            }
         };
         _channel.BasicConsume(queue: QueueName,
             autoAck: true,

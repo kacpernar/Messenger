@@ -8,7 +8,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
-builder.Services.AddSingleton<IMessage, Message>();
 builder.Services.AddSingleton<IMessageHolder, MessageHolder>();
 builder.Services.AddSingleton<IUser, User>();
 builder.Services.AddHostedService<Receiver>();
