@@ -28,6 +28,98 @@ a, .btn-link {
     width: 100px;
 }
 
+
+
+
+.discussion {
+    max-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    flex-flow: column wrap;
+}
+
+.msg {
+    display: flex;
+    flex-direction: column;
+}
+
+.rm-btns{
+    display: flex;
+    flex-direction: row;
+}
+
+.rm-btn {
+    color: red;
+    margin: 0 .1rem;
+    font-size: .8rem;
+}
+
+.name {
+    color: gray;
+    margin-bottom: -.2rem;
+    font-size: .95rem;
+}
+
+.name-left {
+    margin-left: .6rem;
+    align-self: flex-start;
+}
+
+.name-right {
+    margin-right: .6rem;
+    align-self: flex-end;
+}
+
+.inpt{
+    margin-top: 1rem;
+}
+
+.discussion .bubble {
+    border-radius: 1em;
+    padding: 0.25em 0.75em;
+    margin: 0.0625em;
+    max-width: 50%;
+}
+
+        .discussion .bubble.sender {
+            align-self: flex-start;
+            background-color: cornflowerblue;
+            color: #fff;
+        }
+
+        .discussion .bubble.recipient {
+            align-self: flex-end;
+            background-color: #efefef;
+        }
+
+        .discussion .bubble.sender.first {
+            border-bottom-left-radius: 0.1em;
+        }
+
+        .discussion .bubble.sender.last {
+            border-top-left-radius: 0.1em;
+        }
+        /*
+        .discussion > .bubble.sender.middle {
+            border-radius: 0.1em;
+        }*/
+
+        .discussion .bubble.recipient.first {
+            border-bottom-right-radius: 0.1em;
+        }
+
+        .discussion .bubble.recipient.last {
+            border-top-right-radius: 0.1em;
+        }
+        /*
+        .discussion > .bubble.recipient.middle {
+            border-radius: 0.1em;
+        }*/
+
+
+
+
+
 .content {
     padding-top: 1.1rem;
 }
