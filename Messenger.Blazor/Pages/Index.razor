@@ -1,0 +1,20 @@
+﻿@page "/"
+@using Messenger.Blazor.Services
+@inject IUser User
+
+<PageTitle>Index</PageTitle>
+
+<h1>Write Your Name</h1>
+
+<input @bind="Name" />
+<button class="btn btn-primary" @onclick="SetName">Send</button>
+@code {
+    
+    private string? Name { get; set; }
+
+    private void SetName()
+    {
+        if(Name != null)
+            User.Name = Name;
+    }
+}

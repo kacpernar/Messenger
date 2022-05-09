@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Messenger.Blazor.Services;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -6,16 +7,16 @@ namespace Messenger;
 
 public class Receiver : IHostedService
 {
-    private readonly IMessage _message;
+    private readonly IMessageHolder _messageHolder;
     private ConnectionFactory Factory { get; set; }
     private IConnection Connection { get; set; }
     private readonly IModel _channel;
 
     private string QueueName { get; set; }
 
-    public Receiver(IMessage message)
+    public Receiver(IMessageHolder messageHolder)
     {
-        _message = message;
+        _messageHolder = messageHolder;
         Factory = new ConnectionFactory { HostName = "localhost" };
         Connection = Factory.CreateConnection();
         _channel = Connection.CreateModel();
@@ -32,8 +33,12 @@ public class Receiver : IHostedService
         consumer.Received += (model, ea) =>
         {
             var body = ea.Body.ToArray();
-            _message.Text = Encoding.UTF8.GetString(body);
-            Console.WriteLine(" [x] {0}", _message.Text);
+            var message = Encoding.UTF8.GetString(body);
+            _messageHolder.MessageList.Add(new Message()
+            {
+                Text = message
+            });
+            
         };
         _channel.BasicConsume(queue: QueueName,
             autoAck: true,

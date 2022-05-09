@@ -5,9 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen();
 builder.Services.AddRazorPages();
-builder.Services.AddSingleton<IMessage, Message>();
-builder.Services.AddHostedService<Receiver>();
-builder.Services.AddScoped<IMessageProducer, MessageProducer>();
+
 
 var app = builder.Build();
 

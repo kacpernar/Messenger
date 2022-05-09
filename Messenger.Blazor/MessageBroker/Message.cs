@@ -3,4 +3,5 @@
 public class Message : IMessage
 {
     public string Text { get; set; } = "Text";
+    public string UserName { get; set; }
 }

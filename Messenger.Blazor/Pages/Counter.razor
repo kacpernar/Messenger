@@ -1,0 +1,34 @@
+﻿@page "/counter"
+@using Messenger.Blazor.Services
+
+@inject IMessageProducer MessageProducer
+@inject IMessageHolder MessageHolder
+@inject IUser User
+<PageTitle>Counter</PageTitle>
+
+<h1>Chat</h1>
+
+@foreach (var message in MessageHolder.MessageList)
+{
+    if (!message.Text.Equals(User.Name))
+    {
+        <div class="box">@message.Text</div>
+    }
+    
+}
+
+<input @bind="Text" />
+<button class="btn btn-primary" @onclick="IncrementCount">Send</button>
+
+@code {
+    
+    private string? Text { get; set; }
+
+    private List<string> _messages = new();
+
+    private void IncrementCount()
+    {
+        if(Text != null)
+            MessageProducer.SendMessage(Text);
+    }
+}
