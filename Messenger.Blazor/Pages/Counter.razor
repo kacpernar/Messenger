@@ -10,11 +10,20 @@
 
 @foreach (var message in MessageHolder.MessageList)
 {
-    if (!message.Text.Equals(User.Name))
+    if (!message.UserName.Equals(User.Name))
     {
-        <div class="box">@message.Text</div>
+        <div class="box">
+            <div>@message.UserName</div>
+            <div>@message.Text</div>
+        </div>
     }
-    
+    else
+    {
+        <div class="box">
+            <div>@message.UserName</div>
+            <div>@message.Text</div>
+        </div>
+    }
 }
 
 <input @bind="Text" />
@@ -29,6 +38,10 @@
     private void IncrementCount()
     {
         if(Text != null)
-            MessageProducer.SendMessage(Text);
+            MessageProducer.SendMessage(new Message()
+            {
+                UserName = User.Name,
+                Text = Text
+            });
     }
 }

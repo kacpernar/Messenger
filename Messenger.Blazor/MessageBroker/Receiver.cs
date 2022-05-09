@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Text.Json;
 using Messenger.Blazor.Services;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -33,10 +34,12 @@ public class Receiver : IHostedService
         consumer.Received += (model, ea) =>
         {
             var body = ea.Body.ToArray();
-            var message = Encoding.UTF8.GetString(body);
+            var jsonString = Encoding.UTF8.GetString(body);
+            var message = JsonSerializer.Deserialize<Message>(jsonString);
             _messageHolder.MessageList.Add(new Message()
             {
-                Text = message
+                Text = message.Text,
+                UserName = message.UserName
             });
             
         };
