@@ -10,6 +10,7 @@ builder.Services.AddServerSideBlazor();
 
 builder.Services.AddSingleton<IMessageHolder, MessageHolder>();
 builder.Services.AddSingleton<IUser, User>();
+builder.Services.AddSingleton<EventService>();
 builder.Services.AddHostedService<Receiver>();
 builder.Services.AddScoped<IMessageProducer, MessageProducer>();
 

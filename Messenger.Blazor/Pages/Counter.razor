@@ -4,6 +4,8 @@
 @inject IMessageProducer MessageProducer
 @inject IMessageHolder MessageHolder
 @inject IUser User
+@inject IJSRuntime Js
+@inject EventService EventService
 <PageTitle>Counter</PageTitle>
 
 <h1>Chat</h1>
@@ -17,6 +19,7 @@
         <div class="name name-right">@message.UserName</div>
         <div class="bubble recipient">
             <div>@message.Text</div>
+            <img src="@message.Source"/>
         </div>
     }
     else
@@ -25,6 +28,7 @@
             <div class="name name-left">@message.UserName</div>
             <div class="bubble sender middle" @onclick="() => { message.DeleteButtonsVisibility = !message.DeleteButtonsVisibility; }">
                 <div>@message.Text</div>
+                <img src="@message.Source"/>
             </div>
         </div>
         if (message.DeleteButtonsVisibility)
@@ -40,14 +44,36 @@
 
 <input class="inpt" @bind="Text" />
 <button class="btn btn-primary" @onclick="SendMessage">Send</button>
+<InputFile OnChange="ResizeAndDisplayImageUsingStreaming" />
+<img id="showImageHere" />
 
 </section>
 
 @code {
+    private async Task OnStatusChangedMethod(object sender, EventArgs e)
+    {
+    //Invoke StateHasChanged in an async call, helps align the thread with the Synchroniztion context
+        await InvokeAsync(StateHasChanged);
+    }
+    protected override void OnInitialized()
+    {
+    //Unsubsribe once to make sure you only have one event subscription
+    //This prevents event propogation, and won't do anything unless you are 
+    //already subscribed for some reason
+        //EventService.MyEvent -= OnStatusChangedMethod;
+
+    //Subscribe to the event 
+        EventService.MyEvent += OnStatusChangedMethod;
+    }
+    
+    
+    
 
     private string? Text { get; set; }
 
     private List<string> _messages = new();
+
+    private string src { get; set; }
 
     private void SendMessage()
     {
@@ -55,7 +81,8 @@
             MessageProducer.SendMessage(new Message()
             {
                 UserName = User.Name,
-                Text = Text
+                Text = Text,
+                Source = src
             });
     }
 
@@ -67,5 +94,15 @@
             Id = message.Id,
             DeleteMessage = true
         });
+    }
+    private async Task ResizeAndDisplayImageUsingStreaming(InputFileChangeEventArgs e)
+    {
+        var imageFile = e.File;
+        var resizedImage = 
+            await imageFile.RequestImageFileAsync("image/jpg", 250, 250);
+        var jsImageStream = resizedImage.OpenReadStream();
+        var dotnetImageStream = new DotNetStreamReference(jsImageStream);
+        src = await Js.InvokeAsync<string>("setImageUsingStreaming", 
+            "showImageHere", dotnetImageStream);
     }
 }

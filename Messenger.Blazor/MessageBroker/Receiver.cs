@@ -9,15 +9,17 @@ namespace Messenger;
 public class Receiver : IHostedService
 {
     private readonly IMessageHolder _messageHolder;
+    private readonly EventService _eventService;
     private ConnectionFactory Factory { get; set; }
     private IConnection Connection { get; set; }
     private readonly IModel _channel;
 
     private string QueueName { get; set; }
 
-    public Receiver(IMessageHolder messageHolder)
+    public Receiver(IMessageHolder messageHolder, EventService eventService)
     {
         _messageHolder = messageHolder;
+        _eventService = eventService;
         Factory = new ConnectionFactory { HostName = "localhost" };
         Connection = Factory.CreateConnection();
         _channel = Connection.CreateModel();
@@ -49,6 +51,9 @@ public class Receiver : IHostedService
             {
                 _messageHolder.MessageList.Add(message);
             }
+
+            _eventService.OnMessage(this, EventArgs.Empty);
+
         };
         _channel.BasicConsume(queue: QueueName,
             autoAck: true,
@@ -58,6 +63,6 @@ public class Receiver : IHostedService
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        return Task.CompletedTask;
     }
 }
