@@ -78,7 +78,7 @@
             await imageFile.RequestImageFileAsync("image/jpg", 250, 250);
         var jsImageStream = resizedImage.OpenReadStream();
         var dotnetImageStream = new DotNetStreamReference(jsImageStream);
-        await Js.InvokeVoidAsync("setImageUsingStreaming", 
+        var stringbase64 = await Js.InvokeAsync<string>("setImageUsingStreaming", 
             "showImageHere", dotnetImageStream);
     }
 }
