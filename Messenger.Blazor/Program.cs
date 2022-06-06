@@ -1,6 +1,9 @@
 
+using System.Reflection;
 using Messenger;
 using Messenger.Blazor.Services;
+using MediatR;
+using Messenger.Blazor.Mediator;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,8 +11,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
-builder.Services.AddSingleton<IMessageHolder, MessageHolder>();
-builder.Services.AddSingleton<IUser, User>();
+builder.Services.AddMediatR(Assembly.GetExecutingAssembly(), typeof(IMessageService).Assembly);
+builder.Services.AddTransient<IMessageService, MessageService>();
+builder.Services.AddScoped<IRequestHandler<MessageRequestModel, MessageResponseModel>, MessageHandler>();
+
+builder.Services.AddScoped<IMessageHolder, MessageHolder>();
+builder.Services.AddScoped<IUser, User>();
 builder.Services.AddSingleton<EventService>();
 builder.Services.AddHostedService<Receiver>();
 builder.Services.AddScoped<IMessageProducer, MessageProducer>();

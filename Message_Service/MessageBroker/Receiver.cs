@@ -1,27 +1,22 @@
 ﻿using System.Text;
 using System.Text.Json;
-using Messenger.Blazor.Services;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
-namespace Messenger;
+namespace Message_Service.MessageBroker;
 
-public class Receiver : BackgroundService
+public class Receiver : IHostedService
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly EventService _eventService;
-    private readonly IMessageService _messageService;
+    private readonly IMessageHolder _messageHolder;
     private ConnectionFactory Factory { get; set; }
     private IConnection Connection { get; set; }
     private readonly IModel _channel;
 
     private string QueueName { get; set; }
 
-    public Receiver(IServiceProvider serviceProvider, EventService eventService, IMessageService messageService)
+    public Receiver(IMessageHolder messageHolder)
     {
-        _serviceProvider = serviceProvider;
-        _eventService = eventService;
-        _messageService = messageService;
+        _messageHolder = messageHolder;
         Factory = new ConnectionFactory { HostName = "localhost" };
         Connection = Factory.CreateConnection();
         _channel = Connection.CreateModel();
@@ -32,8 +27,7 @@ public class Receiver : BackgroundService
             routingKey: "");
         
     }
-
-    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    public Task StartAsync(CancellationToken cancellationToken)
     {
         var consumer = new EventingBasicConsumer(_channel);
         consumer.Received += (model, ea) =>
@@ -42,18 +36,27 @@ public class Receiver : BackgroundService
             var jsonString = Encoding.UTF8.GetString(body);
             var message = JsonSerializer.Deserialize<Message>(jsonString);
             if (message == null) return;
-            HandleMessage(message);
-
+            if (message.DeleteMessage)
+            {
+                var messageToDelete = _messageHolder.MessageList.Find(m => m.Id == message.Id);
+                if (messageToDelete != null)
+                {
+                    _messageHolder.DeleteMessage(messageToDelete);
+                }
+            }
+            else
+            {
+                _messageHolder.MessageList.Add(message);
+            }
         };
         _channel.BasicConsume(queue: QueueName,
             autoAck: true,
             consumer: consumer);
-        
         return Task.CompletedTask;
     }
 
-    private Task HandleMessage(Message message)
+    public Task StopAsync(CancellationToken cancellationToken)
     {
-        return _messageService.UpdateMessagesList(message);
+        return Task.CompletedTask;
     }
 }

@@ -1,8 +1,9 @@
-﻿namespace Messenger.Blazor.Services;
+﻿using Message_Service.MessageBroker;
+
+namespace Message_Service;
 
 public interface IMessageHolder
 {
-    public List<IUser> Users { get; set; } 
     List<Message> MessageList { get; set; }
     Task DeleteMessage(Message message);
 }

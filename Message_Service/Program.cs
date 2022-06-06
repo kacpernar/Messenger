@@ -1,6 +1,11 @@
+using Message_Service;
+using Message_Service.MessageBroker;
+
 var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();
 
-app.MapGet("/", () => "Hello World!");
+builder.Services.AddSingleton<IMessageHolder, MessageHolder>();
+builder.Services.AddHostedService<Receiver>();
+builder.Services.AddScoped<IMessageProducer, MessageProducer>();
 
 app.Run();
