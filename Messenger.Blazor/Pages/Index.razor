@@ -56,7 +56,7 @@
 <input class="inpt" @bind="Text" />
 <button class="btn btn-primary" @onclick="SendMessage">Send</button>
 <InputFile OnChange="ResizeAndDisplayImageUsingStreaming" />
-<img id="showImageHere" />
+<img src="@src" />
 
 </section>
 
@@ -97,13 +97,15 @@
 
     private void SendMessage()
     {
-        if(Text != null)
-            MessageProducer.SendMessage(new Message()
-            {
-                UserName = User.Name,
-                Text = Text,
-                Source = src
-            });
+        if (Text == null && string.IsNullOrEmpty(src)) return;
+        MessageProducer.SendMessage(new Message()
+        {
+            UserName = User.Name,
+            Text = Text,
+            Source = src
+        });
+        src = string.Empty;
+        Text = null;
     }
 
     private async Task DeleteMessageToEveryone(Message message)
@@ -122,8 +124,14 @@
         var resizedImage = 
             await imageFile.RequestImageFileAsync("image/jpg", 250, 250);
         var jsImageStream = resizedImage.OpenReadStream();
-        var dotnetImageStream = new DotNetStreamReference(jsImageStream);
-        src = await Js.InvokeAsync<string>("setImageUsingStreaming", 
-            "showImageHere", dotnetImageStream);
+        byte[] bytes;
+        using (var memoryStream = new MemoryStream())
+        {
+            await jsImageStream.CopyToAsync(memoryStream);
+            bytes = memoryStream.ToArray();
+        }
+
+        var base64 = Convert.ToBase64String(bytes);
+        src = $"data:image/jpg;base64,{base64}";
     }
 }
