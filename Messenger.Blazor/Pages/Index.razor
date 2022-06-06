@@ -42,7 +42,7 @@
                 <img src="@message.Source"/>
             </div>
         </div>
-        if (message.DeleteButtonsVisibility &&!message.DeleteMessage)
+        if (message.DeleteButtonsVisibility &&!message.Deleted)
         {
             <div class="rm-btns">
                 <button class="btn rm-btn" @onclick="async() => await MessageHolder.DeleteMessage(message)">Usuń</button>
@@ -61,7 +61,7 @@
 </section>
 
 @code {
-    
+
     private string? Name { get; set; }
 
     private void SetName()
@@ -72,22 +72,22 @@
 
     private async Task OnStatusChangedMethod(object sender, EventArgs e)
     {
-    //Invoke StateHasChanged in an async call, helps align the thread with the Synchroniztion context
+        //Invoke StateHasChanged in an async call, helps align the thread with the Synchroniztion context
         await InvokeAsync(StateHasChanged);
     }
     protected override void OnInitialized()
     {
-    //Unsubsribe once to make sure you only have one event subscription
-    //This prevents event propogation, and won't do anything unless you are 
-    //already subscribed for some reason
+        //Unsubsribe once to make sure you only have one event subscription
+        //This prevents event propogation, and won't do anything unless you are 
+        //already subscribed for some reason
         //EventService.MyEvent -= OnStatusChangedMethod;
 
-    //Subscribe to the event 
+        //Subscribe to the event 
         EventService.MyEvent += OnStatusChangedMethod;
     }
-    
-    
-    
+
+
+
 
     private string? Text { get; set; }
 
@@ -110,10 +110,11 @@
     {
         await MessageHolder.DeleteMessage(message);
         MessageProducer.SendMessage(new Message()
-        {
-            Id = message.Id,
-            DeleteMessage = true
-        });
+            {
+                Id = message.Id,
+                DeleteMessage = true,
+                Deleted = true
+    });
     }
     private async Task ResizeAndDisplayImageUsingStreaming(InputFileChangeEventArgs e)
     {
