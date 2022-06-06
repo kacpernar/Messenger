@@ -37,12 +37,12 @@
     {
         <div class="msg">
             <div class="name name-left">@message.UserName</div>
-            <div class="bubble sender middle" @onclick="() => { message.DeleteButtonsVisibility = !message.DeleteButtonsVisibility; }">
+            <div class="bubble sender middle" @onclick="() => {message.DeleteButtonsVisibility = !message.DeleteButtonsVisibility; }">
                 <div>@message.Text</div>
                 <img src="@message.Source"/>
             </div>
         </div>
-        if (message.DeleteButtonsVisibility)
+        if (message.DeleteButtonsVisibility &&!message.DeleteMessage)
         {
             <div class="rm-btns">
                 <button class="btn rm-btn" @onclick="async() => await MessageHolder.DeleteMessage(message)">Usuń</button>

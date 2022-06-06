@@ -6,7 +6,10 @@ public class MessageHolder : IMessageHolder
 
     public Task DeleteMessage(Message message)
     {
-        MessageList.Remove(message);
+        message.DeleteButtonsVisibility = false;
+        message.DeleteMessage = true;
+        message.Text = $"Message was deleted by {message.UserName}";
+        message.Source = string.Empty;
         return Task.CompletedTask;
     } 
 }
