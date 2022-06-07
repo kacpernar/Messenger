@@ -3,25 +3,40 @@ using System.Reflection;
 using Messenger;
 using Messenger.Blazor.Services;
 using MediatR;
+using Messenger.Blazor.Hubs;
 using Messenger.Blazor.Mediator;
+using Microsoft.AspNetCore.ResponseCompression;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
+#region ConfigureServices
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
 builder.Services.AddMediatR(Assembly.GetExecutingAssembly(), typeof(IMessageService).Assembly);
 builder.Services.AddTransient<IMessageService, MessageService>();
-builder.Services.AddScoped<IRequestHandler<MessageRequestModel, MessageResponseModel>, MessageHandler>();
+builder.Services.AddTransient<IRequestHandler<MessageRequestModel, MessageResponseModel>, MessageHandler>();
 
 builder.Services.AddScoped<IMessageHolder, MessageHolder>();
 builder.Services.AddScoped<IUser, User>();
-builder.Services.AddSingleton<EventService>();
+builder.Services.AddScoped<EventService>();
 builder.Services.AddHostedService<Receiver>();
 builder.Services.AddScoped<IMessageProducer, MessageProducer>();
 
+//SignalR
+builder.Services.AddResponseCompression(opts =>
+{
+    opts.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+        new[] { "application/octet-stream" });
+});
+#endregion
+
 var app = builder.Build();
+
+#region app_Configure
+app.UseResponseCompression();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -38,6 +53,8 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.MapBlazorHub();
+app.MapHub<ChatHub>("/chathub");
 app.MapFallbackToPage("/_Host");
 
 app.Run();
+#endregion

@@ -1,6 +1,8 @@
 ﻿using System.Text;
 using System.Text.Json;
+using Messenger.Blazor.Hubs;
 using Messenger.Blazor.Services;
+using Microsoft.AspNetCore.SignalR;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -9,7 +11,6 @@ namespace Messenger;
 public class Receiver : BackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly EventService _eventService;
     private readonly IMessageService _messageService;
     private ConnectionFactory Factory { get; set; }
     private IConnection Connection { get; set; }
@@ -17,10 +18,9 @@ public class Receiver : BackgroundService
 
     private string QueueName { get; set; }
 
-    public Receiver(IServiceProvider serviceProvider, EventService eventService, IMessageService messageService)
+    public Receiver(IServiceProvider serviceProvider, IMessageService messageService)
     {
         _serviceProvider = serviceProvider;
-        _eventService = eventService;
         _messageService = messageService;
         Factory = new ConnectionFactory { HostName = "localhost" };
         Connection = Factory.CreateConnection();
@@ -42,7 +42,11 @@ public class Receiver : BackgroundService
             var jsonString = Encoding.UTF8.GetString(body);
             var message = JsonSerializer.Deserialize<Message>(jsonString);
             if (message == null) return;
-            HandleMessage(message);
+            // Get the ChatHub from SignalR (using DI)
+            var chatHub = (IHubContext<ChatHub>)_serviceProvider.GetRequiredService(typeof(IHubContext<ChatHub>));
+            // Send message to all users in SignalR
+            chatHub.Clients.All.SendAsync("ReceiveMessage", message);
+            //HandleMessage(message);
 
         };
         _channel.BasicConsume(queue: QueueName,
