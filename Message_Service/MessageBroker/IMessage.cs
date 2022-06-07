@@ -1,6 +1,4 @@
-﻿using Messenger.Blazor;
-
-namespace Message_Service.MessageBroker;
+﻿namespace Message_Service.MessageBroker;
 
 public interface IMessage
 {
