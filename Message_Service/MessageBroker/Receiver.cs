@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using System.Text.Json;
+using Messenger.Blazor;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -36,17 +37,27 @@ public class Receiver : IHostedService
             var jsonString = Encoding.UTF8.GetString(body);
             var message = JsonSerializer.Deserialize<Message>(jsonString);
             if (message == null) return;
-            if (message.DeleteMessage)
+            switch (message.MessageStatus)
             {
-                var messageToDelete = _messageHolder.MessageList.Find(m => m.Id == message.Id);
-                if (messageToDelete != null)
+                case MessageStatus.None:
+                    _messageHolder.MessageList.Add(message);
+                    break;
+                case MessageStatus.DeletedByUser:
                 {
-                    _messageHolder.DeleteMessage(messageToDelete);
+                    var index = _messageHolder.MessageList.FindIndex(m => m.Id == message.Id);
+                    _messageHolder.MessageList[index].MessageStatus = MessageStatus.DeletedByUser;
+                    break;
                 }
-            }
-            else
-            {
-                _messageHolder.MessageList.Add(message);
+                case MessageStatus.DeletedToEveryone:
+                    var messageToChange = _messageHolder.MessageList.Find(m => m.Id == message.Id);
+                    if (messageToChange != null)
+                    {
+                        _messageHolder.DeleteMessage(messageToChange);
+                    }
+                    break;
+                default:
+                    _messageHolder.MessageList.Add(message);
+                    break;
             }
         };
         _channel.BasicConsume(queue: QueueName,
