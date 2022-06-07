@@ -1,4 +1,4 @@
-﻿namespace Messenger.Blazor;
+﻿namespace Message_Service;
 
 public enum MessageStatus
 {

@@ -8,7 +8,9 @@ public class MessageHolder : IMessageHolder
 
     public Task DeleteMessage(Message message)
     {
-        MessageList.Remove(message);
+        message.MessageStatus = MessageStatus.DeletedToEveryone;
+        message.Text = $"Message was deleted by {message.UserName}";
+        message.Source = string.Empty;
         return Task.CompletedTask;
     } 
 }
