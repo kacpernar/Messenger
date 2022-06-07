@@ -7,5 +7,6 @@ public class Message : IMessage
     public string Source { get; set; }
     public bool DeleteButtonsVisibility { get; set; }
     public bool DeleteMessage { get; set; }
+    public bool Deleted { get; set; }
     public Guid Id { get; set; } = Guid.NewGuid();
 }

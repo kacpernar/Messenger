@@ -6,5 +6,6 @@ public interface IMessage
     string UserName { get; set;}
     bool DeleteButtonsVisibility { get; set; }
     bool DeleteMessage { get; set; }
+    bool Deleted { get; set; }
     string Source { get; set; }
 }
