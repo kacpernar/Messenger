@@ -15,21 +15,8 @@ public class MessageHandler : IRequestHandler<MessageRequestModel, MessageRespon
     }
     public async Task<MessageResponseModel> Handle(MessageRequestModel request, CancellationToken cancellationToken)
     {
-        var message = request.Message;
-        if (message.DeleteMessage)
-        {
-            var messageToDelete = _messageHolder.MessageList.Find(m => m.Id == message.Id);
-            if (messageToDelete != null)
-            {
-                await _messageHolder.DeleteMessage(messageToDelete);
-            }
-        }
-        else
-        {
-            _messageHolder.MessageList.Add(message);
-        }
-
-        await _eventService.OnMessage(this, EventArgs.Empty);
+        
+        
         return new MessageResponseModel();
     }
 }
