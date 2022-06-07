@@ -45,7 +45,7 @@
         if (message.DeleteButtonsVisibility && !message.Deleted)
         {
             <div class="rm-btns">
-                <button class="btn rm-btn" @onclick="async() => await MessageHolder.DeleteMessage(message)">Usuń</button>
+                <button class="btn rm-btn" @onclick="async() => await DeleteMessageByUser(message)">Usuń</button>
                 <button class="btn rm-btn" @onclick="async() => await DeleteMessageToEveryone(message)">Usuń u wszystkich</button>
             </div> 
         }
@@ -105,15 +105,23 @@
         Text = null;
     }
 
+    private async Task DeleteMessageByUser(Message message)
+    {
+        await MessageHolder.DeleteMessage(message);
+        MessageProducer.SendMessage(new Message()
+        {
+            Id = message.Id,
+            MessageStatus = MessageStatus.DeletedByUser
+        });
+    }
     private async Task DeleteMessageToEveryone(Message message)
     {
         await MessageHolder.DeleteMessage(message);
         MessageProducer.SendMessage(new Message()
-            {
-                Id = message.Id,
-                DeleteMessage = true,
-                Deleted = true
-    });
+        {
+            Id = message.Id,
+            MessageStatus = MessageStatus.DeletedToEveryone
+        });
     }
     private async Task ResizeAndDisplayImageUsingStreaming(InputFileChangeEventArgs e)
     {

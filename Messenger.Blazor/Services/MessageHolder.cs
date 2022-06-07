@@ -13,13 +13,17 @@ public class MessageHolder : IMessageHolder
 
         hubConnection.On<Message>("ReceiveMessage", async message =>
         {
-            if (message.DeleteMessage)
+            if (message.MessageStatus == MessageStatus.DeletedToEveryone)
             {
                 var messageToDelete = MessageList.Find(m => m.Id == message.Id);
                 if (messageToDelete != null)
                 {
                     await DeleteMessage(messageToDelete);
                 }
+            }
+            else if(message.MessageStatus == MessageStatus.DeletedByUser)
+            {
+                return;
             }
             else
             {
