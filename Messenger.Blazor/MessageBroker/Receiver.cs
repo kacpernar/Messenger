@@ -11,17 +11,15 @@ namespace Messenger;
 public class Receiver : BackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly IMessageService _messageService;
     private ConnectionFactory Factory { get; set; }
     private IConnection Connection { get; set; }
     private readonly IModel _channel;
 
     private string QueueName { get; set; }
 
-    public Receiver(IServiceProvider serviceProvider, IMessageService messageService)
+    public Receiver(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
-        _messageService = messageService;
         Factory = new ConnectionFactory { HostName = "localhost" };
         Connection = Factory.CreateConnection();
         _channel = Connection.CreateModel();
@@ -54,10 +52,5 @@ public class Receiver : BackgroundService
             consumer: consumer);
         
         return Task.CompletedTask;
-    }
-
-    private Task HandleMessage(Message message)
-    {
-        return _messageService.UpdateMessagesList(message);
     }
 }

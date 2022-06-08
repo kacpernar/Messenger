@@ -2,5 +2,5 @@
 
 public interface IMessageService
 {
-    Task UpdateMessagesList(Message message);
+    
 }

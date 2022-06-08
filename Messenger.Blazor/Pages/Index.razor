@@ -64,10 +64,10 @@ else
             }
         }
 
-        <input class="inpt" @bind="Text" />
+        <input class="inpt" @bind="Text" @onchange="" />
         <button class="btn btn-primary" @onclick="SendMessage">Send</button>
         <InputFile OnChange="ResizeAndDisplayImageUsingStreaming" />
-        <img src="@src" />
+        <img src="@Src" />
 
     </section>
     </div>
@@ -79,40 +79,31 @@ else
     private string? Name { get; set; }
     private string? Password { get; set; }
     bool LoginFailed { get; set; }
+    private string? Text { get; set; }
+    private string? Src { get; set; }
 
 
     private async Task OnStatusChangedMethod(object sender, EventArgs e)
     {
-        //Invoke StateHasChanged in an async call, helps align the thread with the Synchroniztion context
         await InvokeAsync(StateHasChanged);
     }
     protected override void OnInitialized()
     {
-        //Unsubsribe once to make sure you only have one event subscription
-        //This prevents event propogation, and won't do anything unless you are 
-        //already subscribed for some reason
-        //EventService.MyEvent -= OnStatusChangedMethod;
-
-        //Subscribe to the event 
         EventService.MyEvent += OnStatusChangedMethod;
     }
 
-    private string? Text { get; set; }
-
-    private List<string> _messages = new();
-
-    private string src { get; set; }
+   
 
     private void SendMessage()
     {
-        if (Text == null && string.IsNullOrEmpty(src)) return;
+        if (Text == null && string.IsNullOrEmpty(Src)) return;
         MessageProducer.SendMessage(new Message()
         {
             UserName = UserService.UserName,
             Text = Text,
-            Source = src
+            Source = Src
         });
-        src = string.Empty;
+        Src = string.Empty;
         Text = null;
     }
 
@@ -148,6 +139,6 @@ else
         }
 
         var base64 = Convert.ToBase64String(bytes);
-        src = $"data:image/jpg;base64,{base64}";
+        Src = $"data:image/jpg;base64,{base64}";
     }
 }
