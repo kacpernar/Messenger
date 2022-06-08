@@ -8,4 +8,5 @@ public class Message : IMessage
     public bool DeleteButtonsVisibility { get; set; }
     public MessageStatus MessageStatus { get; set; }
     public Guid Id { get; set; } = Guid.NewGuid();
+    public bool IsPending { get; set; } = false;
 }

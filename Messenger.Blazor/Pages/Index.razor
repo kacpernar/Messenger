@@ -24,9 +24,13 @@
 }
 else
 {
-   <div class="cont">
+    <div class="cont">
 
-   
+    @if (isTyping)
+    {
+        <h3>ktoś pisze</h3>
+    }
+
     <h1 >Your name: @UserService.UserName</h1>
     <br />
     <br/>
@@ -36,36 +40,44 @@ else
 
         @foreach (var message in MessageHolder.MessageList)
         {
-            if (!message.UserName.Equals(UserService.UserName))
-            {
-                <div class="name name-right">@message.UserName</div>
-                <div class="bubble recipient">
-                    <div>@message.Text</div>
-                    <img src="@message.Source"/>
-                </div>
-            }
-            else
-            {
-                <div class="msg">
-                    <div class="name name-left">@message.UserName</div>
-                    <div class="bubble sender middle" @onclick="() => { message.DeleteButtonsVisibility = !message.DeleteButtonsVisibility; }">
-                        <div>@message.Text</div>
-                        <img src="@message.Source"/>
-                    </div>
-                </div>
-                if (message.DeleteButtonsVisibility && message.MessageStatus==MessageStatus.None)
+                if (!message.IsPending)
                 {
-                    <div class="rm-btns">
-                        <button class="btn rm-btn" @onclick="async() => await DeleteMessageByUser(message)">Usuń</button>
-                        <button class="btn rm-btn" @onclick="async() => await DeleteMessageToEveryone(message)">Usuń u wszystkich</button>
-                    </div> 
+                    if (!message.UserName.Equals(UserService.UserName))
+                    {
+                        <div class="name name-right">@message.UserName</div>
+                        <div class="bubble recipient">
+                            <div>@message.Text</div>
+                            <img src="@message.Source"/>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="msg">
+                            <div class="name name-left">@message.UserName</div>
+                            <div class="bubble sender middle" @onclick="() => { message.DeleteButtonsVisibility = !message.DeleteButtonsVisibility; }">
+                                <div>@message.Text</div>
+                                <img src="@message.Source"/>
+                            </div>
+                        </div>
+                        if (message.DeleteButtonsVisibility && message.MessageStatus==MessageStatus.None)
+                        {
+                            <div class="rm-btns">
+                                <button class="btn rm-btn" @onclick="async() => await DeleteMessageByUser(message)">Usuń</button>
+                                <button class="btn rm-btn" @onclick="async() => await DeleteMessageToEveryone(message)">Usuń u wszystkich</button>
+                            </div>
+                        }
+
+                    }
+                }
+                else
+                {
+                    <h3>@message.UserName pisze</h3>
                 }
 
-            }
         }
 
-        <input class="inpt" @bind="Text" />
-        <button class="btn btn-primary" @onclick="SendMessage">Send</button>
+        <input class="inpt" @bind=Text @onkeydown="SendPendingMessage" />
+        <button class="btn btn-primary" @onclick="SendMessage" >Send</button>
         <InputFile OnChange="ResizeAndDisplayImageUsingStreaming" />
         <img src="@src" />
 
@@ -79,6 +91,8 @@ else
     private string? Name { get; set; }
     private string? Password { get; set; }
     bool LoginFailed { get; set; }
+
+    bool isTyping { get; set; }
 
 
     private async Task OnStatusChangedMethod(object sender, EventArgs e)
@@ -105,6 +119,7 @@ else
 
     private void SendMessage()
     {
+        isTyping = false;
         if (Text == null && string.IsNullOrEmpty(src)) return;
         MessageProducer.SendMessage(new Message()
         {
@@ -114,6 +129,23 @@ else
         });
         src = string.Empty;
         Text = null;
+    }
+
+    private void SendPendingMessage(KeyboardEventArgs e)
+    {
+        isTyping = true;
+        if (MessageHolder.MessageList.Any())
+        {
+            MessageHolder.MessageList.RemoveAt(MessageHolder.MessageList.Count - 1);
+        }
+
+        MessageProducer.SendMessage(new Message()
+        {
+            UserName = UserService.UserName,
+            Text = Text,
+            Source = src,
+            IsPending = true
+        });
     }
 
     private async Task DeleteMessageByUser(Message message)

@@ -12,5 +12,5 @@ public class MessageHolder : IMessageHolder
         message.Text = $"Message was deleted by {message.UserName}";
         message.Source = string.Empty;
         return Task.CompletedTask;
-    } 
+    }
 }
