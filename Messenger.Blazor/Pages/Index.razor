@@ -7,15 +7,14 @@
 @inject IJSRuntime Js
 @inject EventService EventService
 
-<PageTitle>Index</PageTitle>
-
-<h1 >Your name: @UserService.UserName</h1>
+<PageTitle>Messenger</PageTitle>
 
 @if (UserService.UserName == null)
 {
-    <div>
-        <input @bind="Name" />
-        <input type="password" @bind="Password"/>
+    <div class="login-form">
+        <h3 >Login</h3>
+        <input @bind="Name" placeholder="Username"/>
+        <input type="password" @bind="Password" placeholder="Password"/>
         <button class="btn btn-primary" @onclick="() => { LoginFailed = UserService.Login(Name, Password); }">Login</button>
         @if (LoginFailed)
         {
@@ -25,6 +24,10 @@
 }
 else
 {
+   <div class="cont">
+
+   
+    <h1 >Your name: @UserService.UserName</h1>
     <br />
     <br/>
     <h1 class="text-center">Chat</h1>
@@ -67,6 +70,7 @@ else
         <img src="@src" />
 
     </section>
+    </div>
 }
 
 
