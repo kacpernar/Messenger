@@ -3,72 +3,79 @@
 
 @inject IMessageProducer MessageProducer
 @inject IMessageHolder MessageHolder
-@inject IUser User
+@inject IUserService UserService
 @inject IJSRuntime Js
 @inject EventService EventService
 
 <PageTitle>Index</PageTitle>
 
-<h1 >Your name: @User.Name</h1>
+<h1 >Your name: @UserService.UserName</h1>
 
-@if (User.Name == null)
+@if (UserService.UserName == null)
 {
-    <input @bind="Name" />
-    <button class="btn btn-primary" @onclick="SetName">Set name</button>
-}
-
-<br />
-<br/>
-<h1 class="text-center">Chat</h1>
-
-<section class="discussion">
-
-@foreach (var message in MessageHolder.MessageList)
-{
-    if (!message.UserName.Equals(User.Name))
-    {
-        <div class="name name-right">@message.UserName</div>
-        <div class="bubble recipient">
-            <div>@message.Text</div>
-            <img src="@message.Source"/>
-        </div>
-    }
-    else
-    {
-        <div class="msg">
-            <div class="name name-left">@message.UserName</div>
-            <div class="bubble sender middle" @onclick="() => { message.DeleteButtonsVisibility = !message.DeleteButtonsVisibility; }">
-                <div>@message.Text</div>
-                <img src="@message.Source"/>
-            </div>
-        </div>
-        if (message.DeleteButtonsVisibility && message.MessageStatus==MessageStatus.None)
+    <div>
+        <input @bind="Name" />
+        <input type="password" @bind="Password"/>
+        <button class="btn btn-primary" @onclick="() => { LoginFailed = UserService.Login(Name, Password); }">Login</button>
+        @if (LoginFailed)
         {
-            <div class="rm-btns">
-                <button class="btn rm-btn" @onclick="async() => await DeleteMessageByUser(message)">Usuń</button>
-                <button class="btn rm-btn" @onclick="async() => await DeleteMessageToEveryone(message)">Usuń u wszystkich</button>
-            </div> 
+            <div style="color:red" >Login Failed. Try Again</div>
+        }
+    </div>
+}
+else
+{
+    <br />
+    <br/>
+    <h1 class="text-center">Chat</h1>
+
+    <section class="discussion">
+
+        @foreach (var message in MessageHolder.MessageList)
+        {
+            if (!message.UserName.Equals(UserService.UserName))
+            {
+                <div class="name name-right">@message.UserName</div>
+                <div class="bubble recipient">
+                    <div>@message.Text</div>
+                    <img src="@message.Source"/>
+                </div>
+            }
+            else
+            {
+                <div class="msg">
+                    <div class="name name-left">@message.UserName</div>
+                    <div class="bubble sender middle" @onclick="() => { message.DeleteButtonsVisibility = !message.DeleteButtonsVisibility; }">
+                        <div>@message.Text</div>
+                        <img src="@message.Source"/>
+                    </div>
+                </div>
+                if (message.DeleteButtonsVisibility && message.MessageStatus==MessageStatus.None)
+                {
+                    <div class="rm-btns">
+                        <button class="btn rm-btn" @onclick="async() => await DeleteMessageByUser(message)">Usuń</button>
+                        <button class="btn rm-btn" @onclick="async() => await DeleteMessageToEveryone(message)">Usuń u wszystkich</button>
+                    </div> 
+                }
+
+            }
         }
 
-    }
+        <input class="inpt" @bind="Text" />
+        <button class="btn btn-primary" @onclick="SendMessage">Send</button>
+        <InputFile OnChange="ResizeAndDisplayImageUsingStreaming" />
+        <img src="@src" />
+
+    </section>
 }
 
-<input class="inpt" @bind="Text" />
-<button class="btn btn-primary" @onclick="SendMessage">Send</button>
-<InputFile OnChange="ResizeAndDisplayImageUsingStreaming" />
-<img src="@src" />
-
-</section>
 
 @code {
 
     private string? Name { get; set; }
+    private string? Password { get; set; }
+    bool LoginFailed { get; set; }
 
-    private void SetName()
-    {
-        if(Name != null)
-            User.Name = Name;
-    }
 
     private async Task OnStatusChangedMethod(object sender, EventArgs e)
     {
@@ -97,7 +104,7 @@
         if (Text == null && string.IsNullOrEmpty(src)) return;
         MessageProducer.SendMessage(new Message()
         {
-            UserName = User.Name,
+            UserName = UserService.UserName,
             Text = Text,
             Source = src
         });

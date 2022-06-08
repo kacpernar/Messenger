@@ -20,7 +20,7 @@ builder.Services.AddTransient<IMessageService, MessageService>();
 builder.Services.AddTransient<IRequestHandler<MessageRequestModel, MessageResponseModel>, MessageHandler>();
 
 builder.Services.AddScoped<IMessageHolder, MessageHolder>();
-builder.Services.AddScoped<IUser, User>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<EventService>();
 builder.Services.AddHostedService<Receiver>();
 builder.Services.AddScoped<IMessageProducer, MessageProducer>();

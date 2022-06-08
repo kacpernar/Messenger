@@ -34,7 +34,7 @@ public class MessageHolder : IMessageHolder
 
         hubConnection.StartAsync();
     }
-    public List<IUser> Users { get; set; } = new List<IUser>();
+    
     public List<Message> MessageList { get; set; } = new List<Message>();
 
     public Task DeleteMessage(Message message)
