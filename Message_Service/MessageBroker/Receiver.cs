@@ -8,23 +8,23 @@ namespace Message_Service.MessageBroker;
 public class Receiver : IHostedService
 {
     private readonly IMessageHolder _messageHolder;
+    private readonly IMessageProducer _messageProducer;
     private ConnectionFactory Factory { get; set; }
     private IConnection Connection { get; set; }
     private readonly IModel _channel;
 
-    private string QueueName { get; set; }
-
-    public Receiver(IMessageHolder messageHolder)
+    public Receiver(IMessageHolder messageHolder, IMessageProducer messageProducer)
     {
         _messageHolder = messageHolder;
+        _messageProducer = messageProducer;
         Factory = new ConnectionFactory { HostName = "localhost" };
         Connection = Factory.CreateConnection();
         _channel = Connection.CreateModel();
-        _channel.ExchangeDeclare(exchange: "logs", type: ExchangeType.Fanout);
-        QueueName = _channel.QueueDeclare().QueueName;
-        _channel.QueueBind(queue: QueueName,
-            exchange: "logs",
-            routingKey: "");
+        _channel.QueueDeclare(queue: "queue",
+            durable: false,
+            exclusive: false,
+            autoDelete: false,
+            arguments: null);
         
     }
     public Task StartAsync(CancellationToken cancellationToken)
@@ -58,8 +58,9 @@ public class Receiver : IHostedService
                     _messageHolder.MessageList.Add(message);
                     break;
             }
+            _messageProducer.SendMessage(message);
         };
-        _channel.BasicConsume(queue: QueueName,
+        _channel.BasicConsume(queue: "queue",
             autoAck: true,
             consumer: consumer);
         return Task.CompletedTask;

@@ -11,12 +11,16 @@ public class MessageProducer : IMessageProducer
         var factory = new ConnectionFactory { HostName = "localhost" };
         using var connection = factory.CreateConnection();
         using var channel = connection.CreateModel();
-        channel.ExchangeDeclare(exchange: "logs", type: ExchangeType.Fanout);
+        channel.QueueDeclare(queue: "queue",
+            durable: false,
+            exclusive: false,
+            autoDelete: false,
+            arguments: null);
 
-        var xd = JsonSerializer.Serialize(message);
-        var body = Encoding.UTF8.GetBytes(xd);
-        channel.BasicPublish(exchange: "logs",
-            routingKey: "",
+        var queueMessage = JsonSerializer.Serialize(message);
+        var body = Encoding.UTF8.GetBytes(queueMessage);
+        channel.BasicPublish(exchange: "",
+            routingKey: "queue",
             basicProperties: null,
             body: body);
     }
