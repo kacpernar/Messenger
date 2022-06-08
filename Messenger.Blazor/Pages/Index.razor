@@ -6,7 +6,7 @@
 @inject IUserService UserService
 @inject IJSRuntime Js
 @inject EventService EventService
-
+@inject IMessageService MessageService
 <PageTitle>Messenger</PageTitle>
 
 @if (UserService.UserName == null)
@@ -36,13 +36,25 @@ else
 
         @foreach (var message in MessageHolder.MessageList)
         {
-            if (!message.UserName.Equals(UserService.UserName))
+            if (message.UserName != null && !message.UserName.Equals(UserService.UserName))
             {
-                <div class="name name-right">@message.UserName</div>
-                <div class="bubble recipient">
-                    <div>@message.Text</div>
-                    <img src="@message.Source"/>
-                </div>
+                @if (message.MessageStatus != MessageStatus.Pending)
+                {
+                    <div class="msg">
+                        <div class="name name-left">@message.UserName</div>
+                        <div class="bubble sender middle" >
+                            <div>Is writing</div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="name name-right">@message.UserName</div>
+                    <div class="bubble recipient">
+                        <div>@message.Text</div>
+                        <img src="@message.Source"/>
+                    </div>
+                }
             }
             else
             {
@@ -56,15 +68,13 @@ else
                 if (message.DeleteButtonsVisibility && message.MessageStatus==MessageStatus.None)
                 {
                     <div class="rm-btns">
-                        <button class="btn rm-btn" @onclick="async() => await DeleteMessageByUser(message)">Usuń</button>
-                        <button class="btn rm-btn" @onclick="async() => await DeleteMessageToEveryone(message)">Usuń u wszystkich</button>
+                        <button class="btn rm-btn" @onclick="async() => await MessageService.DeleteMessageByUser(message)">Usuń</button>
+                        <button class="btn rm-btn" @onclick="async() => await MessageService.DeleteMessageToEveryone(message)">Usuń u wszystkich</button>
                     </div> 
                 }
-
             }
         }
-
-        <input class="inpt" @bind="Text" @onchange="" />
+        <input class="inpt" @bind-value="Text" @bind-value:event="oninput" />
         <button class="btn btn-primary" @onclick="SendMessage">Send</button>
         <InputFile OnChange="ResizeAndDisplayImageUsingStreaming" />
         <img src="@Src" />
@@ -76,10 +86,25 @@ else
 
 @code {
 
+    bool UserWriting { get; set; }
     private string? Name { get; set; }
     private string? Password { get; set; }
     bool LoginFailed { get; set; }
-    private string? Text { get; set; }
+    string? _myVar;
+    private string? Text { get => _myVar;
+        set
+        {
+            _myVar = value;
+
+            if (value != null && !UserWriting)
+            {
+                PendingMessage(MessageStatus.Pending);
+                UserWriting = true;
+            }
+            if (!string.IsNullOrEmpty(value)) return;
+            PendingMessage(MessageStatus.StopPending);
+            UserWriting = false;
+        }}
     private string? Src { get; set; }
 
 
@@ -91,13 +116,12 @@ else
     {
         EventService.MyEvent += OnStatusChangedMethod;
     }
+    
 
-   
-
-    private void SendMessage()
+    private async Task SendMessage()
     {
         if (Text == null && string.IsNullOrEmpty(Src)) return;
-        MessageProducer.SendMessage(new Message()
+        await MessageProducer.SendMessage(new Message()
         {
             UserName = UserService.UserName,
             Text = Text,
@@ -107,24 +131,17 @@ else
         Text = null;
     }
 
-    private async Task DeleteMessageByUser(Message message)
+    private void PendingMessage(MessageStatus status)
     {
-        await MessageHolder.DeleteMessage(message);
         MessageProducer.SendMessage(new Message()
         {
-            Id = message.Id,
-            MessageStatus = MessageStatus.DeletedByUser
+            UserName = UserService.UserName,
+            MessageStatus = status
         });
     }
-    private async Task DeleteMessageToEveryone(Message message)
-    {
-        await MessageHolder.DeleteMessage(message);
-        MessageProducer.SendMessage(new Message()
-        {
-            Id = message.Id,
-            MessageStatus = MessageStatus.DeletedToEveryone
-        });
-    }
+
+    
+    
     private async Task ResizeAndDisplayImageUsingStreaming(InputFileChangeEventArgs e)
     {
         var imageFile = e.File;

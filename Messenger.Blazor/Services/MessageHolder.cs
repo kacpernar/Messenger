@@ -13,30 +13,42 @@ public class MessageHolder : IMessageHolder
 
         hubConnection.On<Message>("ReceiveMessage", async message =>
         {
-            if (message.MessageStatus == MessageStatus.DeletedToEveryone)
+            switch (message.MessageStatus)
             {
-                var messageToDelete = MessageList.Find(m => m.Id == message.Id);
-                if (messageToDelete != null)
+                case MessageStatus.DeletedToEveryone:
                 {
-                    await DeleteMessage(messageToDelete);
+                    var messageToDelete = MessageList.Find(m => m.Id == message.Id);
+                    if (messageToDelete != null)
+                    {
+                        await DeleteMessage(messageToDelete);
+                    }
+
+                    break;
                 }
+                case MessageStatus.DeletedByUser:
+                    return;
+                case MessageStatus.None:
+                    MessageList.Add(message);
+                    break;
+                case MessageStatus.Pending:
+                    MessageList.Add(message);
+                    break;
+                case MessageStatus.StopPending:
+                    MessageList.RemoveAll(t => t.UserName == message.UserName && t.MessageStatus == MessageStatus.Pending);
+                    break;
+                default:
+                    MessageList.Add(message);
+                    break;
             }
-            else if(message.MessageStatus == MessageStatus.DeletedByUser)
-            {
-                return;
-            }
-            else
-            {
-                MessageList.Add(message);
-            }
+
             await eventService.OnMessage(this, EventArgs.Empty);
         });
 
         hubConnection.StartAsync();
     }
     
-    public List<Message> MessageList { get; set; } = new List<Message>();
-
+    public List<Message> MessageList { get; set; } = new();
+    
     public Task DeleteMessage(Message message)
     {
         message.MessageStatus = MessageStatus.DeletedToEveryone;

@@ -12,8 +12,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
 
-builder.Services.AddTransient<IMessageService, MessageService>();
-
+builder.Services.AddScoped<IMessageService, MessageService>();
 builder.Services.AddScoped<IMessageHolder, MessageHolder>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<EventService>();

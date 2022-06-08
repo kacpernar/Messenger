@@ -2,5 +2,5 @@
 
 public interface IMessageProducer
 {
-    void SendMessage (Message message);
+    Task SendMessage (Message message);
 }
