@@ -38,7 +38,7 @@ else
         {
             if (message.UserName != null && !message.UserName.Equals(UserService.UserName))
             {
-                @if (message.MessageStatus != MessageStatus.Pending)
+                @if (message.MessageStatus == MessageStatus.Pending)
                 {
                     <div class="msg">
                         <div class="name name-left">@message.UserName</div>
