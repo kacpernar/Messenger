@@ -1,9 +1,15 @@
 ﻿@page "/"
+@using System.Security.Claims
+@using Messenger.Blazor.Services
 @namespace Messenger.Blazor.Pages
+
+
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
     Layout = "_Layout";
 }
-
-<component type="typeof(App)" render-mode="ServerPrerendered" />
+@{
+    var userName = HttpContext.User.FindFirstValue("name");
+}
+<component type="typeof(App)" render-mode="Server" param-UserName="userName" />
 <script src="setImageUsingStreaming.js"></script>
