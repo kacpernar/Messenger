@@ -1,4 +1,18 @@
-﻿<Router AppAssembly="@typeof(App).Assembly">
+﻿@using Messenger.Blazor.Services
+@inject IUserService UserService
+@code{
+
+    [Parameter]
+    public string? UserName { get; set; }
+
+    protected override Task OnInitializedAsync()
+    {
+        UserService.UserName = UserName;
+        return base.OnInitializedAsync();
+    }
+
+}
+<Router AppAssembly="@typeof(App).Assembly">
     <Found Context="routeData">
         <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
         <FocusOnNavigate RouteData="@routeData" Selector="h1" />
