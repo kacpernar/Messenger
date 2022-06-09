@@ -20,7 +20,8 @@ public class Receiver : BackgroundService
     public Receiver(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;
-        Factory = new ConnectionFactory { HostName = "localhost" };
+        //Factory = new ConnectionFactory { HostName = "localhost" };
+        Factory = new ConnectionFactory { HostName = "rabbitmq" };
         Connection = Factory.CreateConnection();
         _channel = Connection.CreateModel();
         _channel.ExchangeDeclare(exchange: "logs", type: ExchangeType.Fanout);
