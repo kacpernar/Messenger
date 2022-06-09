@@ -26,10 +26,9 @@ else
 {
     <div class="cont">
 
-    @if (isTyping)
-    {
-        <h3>ktoś pisze</h3>
-    }
+
+        @*@foreach(var t in GetUsersLastPendingMessage()) {<h6>@t.UserName</h6>}*@
+
 
     <h1 >Your name: @UserService.UserName</h1>
     <br />
@@ -69,20 +68,45 @@ else
 
                     }
                 }
-                else
+                @*else
                 {
-                    <h3>@message.UserName pisze</h3>
-                }
+                    @foreach(var mess in GetUsersLastPendingMessage())
+                    {
+                        @if (pending_message_sent)
+                        {
+                            <h6>@message.UserName pisze...</h6> 
+                        }
+                    }
+                }*@
 
         }
+        @*@foreach (var message in MessageHolder.MessageList)
+        {
+            if (message.IsPending)*@
+                @foreach(var mess in GetUsersLastPendingMessage())
+                {
+                    if (true)
+                    {
+                        <h6>@mess.UserName pisze...</h6> 
+                    }
+                }
+                    
+        @*}*@
 
-        <input class="inpt" @bind=Text @onkeydown="SendPendingMessage" />
+        <input class="inpt" value=@Text @oninput="SendPendingMessage" />
         <button class="btn btn-primary" @onclick="SendMessage" >Send</button>
         <InputFile OnChange="ResizeAndDisplayImageUsingStreaming" />
         <img src="@src" />
 
     </section>
     </div>
+                    @foreach(var ff in pendings_users)
+                {
+                    if (true)
+                    {
+                        <h6>@ff</h6> 
+                    }
+                }
 }
 
 
@@ -93,6 +117,48 @@ else
     bool LoginFailed { get; set; }
 
     bool isTyping { get; set; }
+    bool pending_message_sent { get; set; } = false;
+    List<string> pendings_users = new List<string>();
+
+    private List<Message> GetUsersLastPendingMessage()
+    {
+        var list_of_all_pendings = MessageHolder.MessageList.FindAll(FindUsersPendingMessages);
+        var list_of_last_pendings = new List<Message>();
+
+        foreach (var p in list_of_all_pendings)
+        {
+            if (!pendings_users.Contains(p.UserName)) pendings_users.Add(p.UserName);
+        }
+        foreach (var u in pendings_users)
+        {
+            list_of_last_pendings.Add(list_of_all_pendings.FindLast(FindUsersLastPendingMessage));
+        }
+
+        return list_of_last_pendings;
+    }
+
+    private bool FindUsersLastPendingMessage(Message mm)
+    { 
+        foreach(var g in pendings_users)
+        {
+            if (mm.UserName != Name && mm.UserName == g)
+            {
+                return true;
+            }
+            
+            else return false;
+        }
+        return false;
+    }
+
+    private bool FindUsersPendingMessages(Message mm)
+    {
+        if (mm.UserName != Name && mm.IsPending) return true;
+        else return false;
+    }
+
+
+
 
 
     private async Task OnStatusChangedMethod(object sender, EventArgs e)
@@ -119,7 +185,7 @@ else
 
     private void SendMessage()
     {
-        isTyping = false;
+        //isTyping = false;
         if (Text == null && string.IsNullOrEmpty(src)) return;
         MessageProducer.SendMessage(new Message()
         {
@@ -129,23 +195,27 @@ else
         });
         src = string.Empty;
         Text = null;
+        //pending_message_sent = false;
     }
 
-    private void SendPendingMessage(KeyboardEventArgs e)
+    private void SendPendingMessage(ChangeEventArgs  e)
     {
-        isTyping = true;
-        if (MessageHolder.MessageList.Any())
-        {
-            MessageHolder.MessageList.RemoveAt(MessageHolder.MessageList.Count - 1);
-        }
+        Text = e.Value.ToString();
+        //isTyping = true;
 
-        MessageProducer.SendMessage(new Message()
+        if(Text != null)
         {
-            UserName = UserService.UserName,
-            Text = Text,
-            Source = src,
-            IsPending = true
-        });
+            //pending_message_sent = true;
+            MessageProducer.SendMessage(new Message()
+            {
+                UserName = UserService.UserName,
+                Text = Text,
+                Source = src,
+                IsPending = true
+            });
+        }
+        //if (Text != null && Text.Length == 0)
+        //    pending_message_sent = false;
     }
 
     private async Task DeleteMessageByUser(Message message)
