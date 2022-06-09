@@ -9,26 +9,10 @@
 @inject IMessageService MessageService
 <PageTitle>Messenger</PageTitle>
 
-@if (UserService.UserName == null)
-{
-    <div class="login-form">
-        <h3 >Login</h3>
-        <input @bind="Name" placeholder="Username"/>
-        <input type="password" @bind="Password" placeholder="Password"/>
-        <button class="btn btn-primary" @onclick="() => { LoginFailed = UserService.Login(Name, Password); }">Login</button>
-        @if (LoginFailed)
-        {
-            <div style="color:red" >Login Failed. Try Again</div>
-        }
-    </div>
-}
-else
-{
-   <div class="cont">
 
-   
+<div class="cont">
     <h1 >Your name: @UserService.UserName</h1>
-    <br />
+    <br/>
     <br/>
     <h1 class="text-center">Chat</h1>
 
@@ -41,8 +25,8 @@ else
                 @if (message.MessageStatus == MessageStatus.Pending)
                 {
                     <div class="msg">
-                        <div class="name name-left">@message.UserName</div>
-                        <div class="bubble sender middle" >
+                        <div class="name name-right">@message.UserName</div>
+                        <div class="bubble recipient">
                             <div>Is writing</div>
                         </div>
                     </div>
@@ -52,8 +36,9 @@ else
                     <div class="name name-right">@message.UserName</div>
                     <div class="bubble recipient">
                         <div>@message.Text</div>
-                        <img src="@message.Source"/>
+                        <img src="@message.Source"/>                        
                     </div>
+                    <div class="name-right">@message.DateTime</div>
                 }
             }
             else
@@ -62,26 +47,27 @@ else
                     <div class="name name-left">@message.UserName</div>
                     <div class="bubble sender middle" @onclick="() => { message.DeleteButtonsVisibility = !message.DeleteButtonsVisibility; }">
                         <div>@message.Text</div>
-                        <img src="@message.Source"/>
+                        <img src="@message.Source"/>                        
                     </div>
+                    <div class="name-left">@message.DateTime</div>
                 </div>
-                if (message.DeleteButtonsVisibility && message.MessageStatus==MessageStatus.None)
+                if (message.DeleteButtonsVisibility && message.MessageStatus == MessageStatus.None)
                 {
                     <div class="rm-btns">
-                        <button class="btn rm-btn" @onclick="async() => await MessageService.DeleteMessageByUser(message)">Usuń</button>
-                        <button class="btn rm-btn" @onclick="async() => await MessageService.DeleteMessageToEveryone(message)">Usuń u wszystkich</button>
-                    </div> 
+                        <button class="btn rm-btn" @onclick="async () => await MessageService.DeleteMessageByUser(message)">Usuń</button>
+                        <button class="btn rm-btn" @onclick="async () => await MessageService.DeleteMessageToEveryone(message)">Usuń u wszystkich</button>
+                    </div>
                 }
             }
         }
-        <input class="inpt" @bind-value="Text" @bind-value:event="oninput" />
+        <input class="inpt" @bind-value="Text" @bind-value:event="oninput"/>
         <button class="btn btn-primary" @onclick="SendMessage">Send</button>
-        <InputFile OnChange="ResizeAndDisplayImageUsingStreaming" />
-        <img src="@Src" />
+        <InputFile OnChange="ResizeAndDisplayImageUsingStreaming"/>
+        <img src="@Src"/>
 
     </section>
-    </div>
-}
+</div>
+
 
 
 @code {
@@ -116,17 +102,18 @@ else
     {
         EventService.MyEvent += OnStatusChangedMethod;
     }
-    
+
 
     private async Task SendMessage()
     {
         if (Text == null && string.IsNullOrEmpty(Src)) return;
         await MessageProducer.SendMessage(new Message()
-        {
-            UserName = UserService.UserName,
-            Text = Text,
-            Source = Src
-        });
+            {
+                UserName = UserService.UserName,
+                Text = Text,
+                Source = Src,
+                DateTime = DateTime.Now
+    });
         Src = string.Empty;
         Text = null;
     }

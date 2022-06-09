@@ -7,4 +7,5 @@ public interface IMessage
     bool DeleteButtonsVisibility { get; set; }
     MessageStatus MessageStatus { get; set; }
     string Source { get; set; }
+    public DateTime DateTime { get; set; }
 }

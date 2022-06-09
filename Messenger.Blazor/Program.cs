@@ -1,3 +1,4 @@
+using System.IdentityModel.Tokens.Jwt;
 using Messenger;
 using Messenger.Blazor.Services;
 using Messenger.Blazor.Hubs;
@@ -11,6 +12,30 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
+//Auth
+JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
+
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultScheme = "Cookies";
+        options.DefaultChallengeScheme = "oidc";
+    })
+    .AddCookie("Cookies")
+    .AddOpenIdConnect("oidc", options =>
+    {
+        options.Authority = "https://localhost:5001";
+
+        options.ClientId = "web";
+        options.ClientSecret = "secret";
+        options.ResponseType = "code";
+        options.GetClaimsFromUserInfoEndpoint = true;
+
+        options.Scope.Clear();
+        options.Scope.Add("openid");
+        options.Scope.Add("profile");
+
+        options.SaveTokens = true;
+    });
 
 builder.Services.AddScoped<IMessageService, MessageService>();
 builder.Services.AddScoped<IMessageHolder, MessageHolder>();
@@ -47,6 +72,10 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapRazorPages().RequireAuthorization();
 
 app.MapBlazorHub();
 app.MapHub<ChatHub>("/chathub");
