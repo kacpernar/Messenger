@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR.Client;
+using MongoDB.Bson;
+using MongoDB.Driver;
 
 namespace Messenger.Blazor.Services;
 
@@ -14,6 +17,12 @@ public class MessageHolder : IMessageHolder
             .WithUrl(navigationManager.ToAbsoluteUri("/chathub"))
             .Build();
 
+        var settings = MongoClientSettings.FromConnectionString("mongodb+srv://Jedi:lubiezapierdalac2115@messenger.og6bf.mongodb.net/?retryWrites=true&w=majority");
+        settings.ServerApi = new ServerApi(ServerApiVersion.V1);
+        var client = new MongoClient(settings);
+        var database = client.GetDatabase("Messenger");
+        var collection = database.GetCollection<BsonDocument>("Messages");
+        
         hubConnection.On<Message>("ReceiveMessage", async message =>
         {
             if (message.UserName != userService.UserName)
@@ -32,8 +41,13 @@ public class MessageHolder : IMessageHolder
                     }
                     case MessageStatus.DeletedByUser:
                         return;
-                    case MessageStatus.None:
-                        MessageList.Add(message);
+                    case MessageStatus.None:       
+                        var messageToDb=new BsonDocument {{"user", message.UserName },
+                            {"text", message.Text},
+                            {"imageSource", message.Source}
+                        };
+                        await collection.InsertOneAsync(messageToDb);
+                        //MessageList.Add(message);
                         break;
                     case MessageStatus.Pending:
                         MessageList.Add(message);
@@ -46,7 +60,15 @@ public class MessageHolder : IMessageHolder
             else
             {
                 if(message.MessageStatus == MessageStatus.None)
-                    MessageList.Add(message);
+                {
+                    var messageToDb = new BsonDocument {{"user", message.UserName },
+                            {"text", message.Text},
+                            {"imageSource", message.Source}
+                        };
+                    await collection.InsertOneAsync(messageToDb);
+                }
+
+                    //MessageList.Add(message);
             }
             
 

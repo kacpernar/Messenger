@@ -2,7 +2,7 @@ using Messenger;
 using Messenger.Blazor.Services;
 using Messenger.Blazor.Hubs;
 using Microsoft.AspNetCore.ResponseCompression;
-
+using Messenger.Blazor;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +18,8 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<EventService>();
 builder.Services.AddHostedService<Receiver>();
 builder.Services.AddScoped<IMessageProducer, MessageProducer>();
+builder.Services.Configure<DatabaseSettings>(builder.Configuration.GetSection("MessengerDatabase"));
+
 
 //SignalR
 builder.Services.AddResponseCompression(opts =>
