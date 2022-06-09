@@ -52,8 +52,9 @@ else
                     <div class="name name-right">@message.UserName</div>
                     <div class="bubble recipient">
                         <div>@message.Text</div>
-                        <img src="@message.Source"/>
+                        <img src="@message.Source"/>                        
                     </div>
+                    <div class="name-right">@message.DateTime</div>
                 }
             }
             else
@@ -62,8 +63,9 @@ else
                     <div class="name name-left">@message.UserName</div>
                     <div class="bubble sender middle" @onclick="() => { message.DeleteButtonsVisibility = !message.DeleteButtonsVisibility; }">
                         <div>@message.Text</div>
-                        <img src="@message.Source"/>
+                        <img src="@message.Source"/>                        
                     </div>
+                    <div class="name-left">@message.DateTime</div>
                 </div>
                 if (message.DeleteButtonsVisibility && message.MessageStatus==MessageStatus.None)
                 {
@@ -116,17 +118,18 @@ else
     {
         EventService.MyEvent += OnStatusChangedMethod;
     }
-    
+
 
     private async Task SendMessage()
     {
         if (Text == null && string.IsNullOrEmpty(Src)) return;
         await MessageProducer.SendMessage(new Message()
-        {
-            UserName = UserService.UserName,
-            Text = Text,
-            Source = Src
-        });
+            {
+                UserName = UserService.UserName,
+                Text = Text,
+                Source = Src,
+                DateTime = DateTime.Now
+    });
         Src = string.Empty;
         Text = null;
     }
