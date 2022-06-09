@@ -30,6 +30,10 @@ internal static class HostingExtensions
         {
             app.UseDeveloperExceptionPage();
         }
+        else
+        {
+            app.UseHttpsRedirection();
+        }
 
         // uncomment if you want to add a UI
         app.UseStaticFiles();

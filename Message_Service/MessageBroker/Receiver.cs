@@ -17,7 +17,8 @@ public class Receiver : IHostedService
     {
         _messageHolder = messageHolder;
         _messageProducer = messageProducer;
-        Factory = new ConnectionFactory { HostName = "localhost" };
+        //Factory = new ConnectionFactory { HostName = "localhost" };
+        Factory = new ConnectionFactory { HostName = "rabbitmq" };
         Connection = Factory.CreateConnection();
         _channel = Connection.CreateModel();
         _channel.QueueDeclare(queue: "queue",

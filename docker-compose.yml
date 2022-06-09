@@ -1,0 +1,47 @@
+version: '3.9'
+services:
+    web:
+        build:
+            context: .
+            dockerfile: Messenger.Blazor\Dockerfile
+        ports:
+            - "5003:5003"
+        depends_on:
+            - auth
+            - message
+            - rabbitmq
+        networks:
+            - aspcore-network
+    rabbitmq:
+        image: rabbitmq:3.9-management
+        hostname: rabbitmq
+        healthcheck:
+            test: rabbitmq-diagnostics -q ping
+            interval: 30s
+            timeout: 30s
+            retries: 3
+        networks:
+            - aspcore-network
+    message:
+        build:
+            context: .
+            dockerfile: Message_Service\Dockerfile
+        ports:
+            - "5073:5073"
+        depends_on:
+            -   rabbitmq
+        networks:
+            - aspcore-network
+        
+    auth:
+        build:
+            context: .
+            dockerfile: IdentityServer\Dockerfile
+        ports:
+            - "5000:5000"
+        networks:
+            - aspcore-network
+    
+networks:
+    aspcore-network:
+        driver: bridge
