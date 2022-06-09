@@ -17,7 +17,7 @@ public class MessageHolder : IMessageHolder
             .WithUrl(navigationManager.ToAbsoluteUri("/chathub"))
             .Build();
 
-        var settings = MongoClientSettings.FromConnectionString("mongodb+srv://Jedi:lubiezapierdalac2115@messenger.og6bf.mongodb.net/?retryWrites=true&w=majority");
+        var settings = MongoClientSettings.FromConnectionString();
         settings.ServerApi = new ServerApi(ServerApiVersion.V1);
         var client = new MongoClient(settings);
         var database = client.GetDatabase("Messenger");
@@ -44,7 +44,7 @@ public class MessageHolder : IMessageHolder
                     case MessageStatus.None:       
                         var messageToDb=new BsonDocument {{"user", message.UserName },
                             {"text", message.Text},
-                            {"imageSource", message.Source}
+                            {"imageSource", message.Source},
                         };
                         await collection.InsertOneAsync(messageToDb);
                         //MessageList.Add(message);
