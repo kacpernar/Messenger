@@ -1,10 +1,6 @@
-
-using System.Reflection;
 using Messenger;
 using Messenger.Blazor.Services;
-using MediatR;
 using Messenger.Blazor.Hubs;
-using Messenger.Blazor.Mediator;
 using Microsoft.AspNetCore.ResponseCompression;
 
 
@@ -15,10 +11,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
-builder.Services.AddMediatR(Assembly.GetExecutingAssembly(), typeof(IMessageService).Assembly);
-builder.Services.AddTransient<IMessageService, MessageService>();
-builder.Services.AddTransient<IRequestHandler<MessageRequestModel, MessageResponseModel>, MessageHandler>();
 
+builder.Services.AddScoped<IMessageService, MessageService>();
 builder.Services.AddScoped<IMessageHolder, MessageHolder>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<EventService>();

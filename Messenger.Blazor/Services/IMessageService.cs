@@ -2,5 +2,6 @@
 
 public interface IMessageService
 {
-    Task UpdateMessagesList(Message message);
+    Task DeleteMessageToEveryone(Message message);
+    Task DeleteMessageByUser(Message message);
 }

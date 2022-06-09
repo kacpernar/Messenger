@@ -54,6 +54,10 @@ public class Receiver : IHostedService
                         _messageHolder.DeleteMessage(messageToChange);
                     }
                     break;
+                case MessageStatus.Pending:
+                    break;
+                case MessageStatus.StopPending:
+                    break;
                 default:
                     _messageHolder.MessageList.Add(message);
                     break;

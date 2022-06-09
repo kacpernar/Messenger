@@ -1,30 +1,33 @@
-﻿using MediatR;
-using Messenger.Blazor.Mediator;
+﻿
 
 namespace Messenger.Blazor.Services;
 
 public class MessageService : IMessageService
 {
-    private readonly IMediator _mediator;
+    private readonly IMessageHolder _messageHolder;
+    private readonly IMessageProducer _messageProducer;
 
-    public MessageService(IMediator mediator)
+    public MessageService(IMessageHolder messageHolder,IMessageProducer messageProducer)
     {
-        _mediator = mediator;
+        _messageHolder = messageHolder;
+        _messageProducer = messageProducer;
     }
-    public async Task UpdateMessagesList(Message message)
+    public async Task DeleteMessageToEveryone(Message message)
     {
-        try
+        await _messageHolder.DeleteMessage(message);
+        await _messageProducer.SendMessage(new Message()
         {
-            var result = await _mediator.Send(new MessageRequestModel()
-            {
-                Message = message
-            });
-
-        }
-        catch (Exception e)
+            Id = message.Id,
+            MessageStatus = MessageStatus.DeletedToEveryone
+        });
+    }
+    public async Task DeleteMessageByUser(Message message)
+    {
+        await _messageHolder.DeleteMessage(message);
+        await _messageProducer.SendMessage(new Message()
         {
-            Console.WriteLine(e);
-            throw;
-        }
+            Id = message.Id,
+            MessageStatus = MessageStatus.DeletedByUser
+        });
     }
 }

@@ -6,7 +6,7 @@ namespace Messenger;
 
 public class MessageProducer : IMessageProducer
 {
-    public void SendMessage(Message message)
+    public Task SendMessage(Message message)
     {
         var factory = new ConnectionFactory { HostName = "localhost" };
         using var connection = factory.CreateConnection();
@@ -23,5 +23,6 @@ public class MessageProducer : IMessageProducer
             routingKey: "queue",
             basicProperties: null,
             body: body);
+        return Task.CompletedTask;
     }
 }
