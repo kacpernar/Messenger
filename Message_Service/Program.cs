@@ -3,6 +3,7 @@ using Message_Service.MessageBroker;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddControllers();
 builder.Services.AddSingleton<IMessageHolder, MessageHolder>();
 builder.Services.AddHostedService<Receiver>();
 builder.Services.AddTransient<IMessageProducer, MessageProducer>();
