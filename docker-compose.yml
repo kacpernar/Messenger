@@ -5,7 +5,7 @@ services:
             context: .
             dockerfile: Messenger.Blazor\Dockerfile
         ports:
-            - "5003:5003"
+            - "5002:80"
         depends_on:
             - auth
             - message
@@ -26,8 +26,6 @@ services:
         build:
             context: .
             dockerfile: Message_Service\Dockerfile
-        ports:
-            - "5073:5073"
         depends_on:
             -   rabbitmq
         networks:
@@ -38,7 +36,7 @@ services:
             context: .
             dockerfile: IdentityServer\Dockerfile
         ports:
-            - "5000:5000"
+            - "5001:80"
         networks:
             - aspcore-network
     
