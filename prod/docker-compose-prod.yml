@@ -1,9 +1,7 @@
 version: '3.9'
 services:
     web:
-        build:
-            context: .
-            dockerfile: Messenger.Blazor\Dockerfile
+        image: miksior/messenger-web:latest
         ports:
             - "5002:80"
         depends_on:
@@ -26,9 +24,7 @@ services:
         networks:
             - aspcore-network
     message:
-        build:
-            context: .
-            dockerfile: Message_Service\Dockerfile
+        image: miksior/messenger_api:latest
         depends_on:
             rabbitmq:
                 condition: service_healthy
@@ -36,10 +32,7 @@ services:
             - aspcore-network
         
     identityserver:
-        image: identityserver
-        build:
-            context: .
-            dockerfile: IdentityServer\Dockerfile
+        image: miksior/messenger_identity:latest
         ports:
             - "5001:80"
         networks:
