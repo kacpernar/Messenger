@@ -23,7 +23,22 @@ builder.Services.AddAuthentication(options =>
     .AddCookie("Cookies")
     .AddOpenIdConnect("oidc", options =>
     {
-        options.Authority = "http://172.18.0.3/";
+        // It is important this matches the actual URL of your identity server, not the Docker internal URL
+        options.Authority = "http://localhost:5001";
+
+        
+        // This will allow the container to reach the discovery endpoint
+        options.MetadataAddress = "http://identityserver/.well-known/openid-configuration";
+        options.RequireHttpsMetadata = false;
+
+        options.Events.OnRedirectToIdentityProvider = context =>
+        {
+            // Intercept the redirection so the browser navigates to the right URL in your host
+            context.ProtocolMessage.IssuerAddress = "http://localhost:5001/connect/authorize";
+            return Task.CompletedTask;
+        };
+        
+
 
         options.ClientId = "web";
         options.ClientSecret = "secret";
@@ -34,7 +49,7 @@ builder.Services.AddAuthentication(options =>
         options.Scope.Add("openid");
         options.Scope.Add("profile");
 
-        options.RequireHttpsMetadata = false;
+        
 
         options.SaveTokens = true;
     });
