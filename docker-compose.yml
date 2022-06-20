@@ -7,9 +7,12 @@ services:
         ports:
             - "5002:80"
         depends_on:
-            - identityserver
-            - message
-            - rabbitmq
+            identityserver:
+                condition: service_started
+            message:
+                condition: service_started
+            rabbitmq:
+                condition: service_healthy
         networks:
             - aspcore-network
     rabbitmq:
@@ -17,9 +20,9 @@ services:
         hostname: rabbitmq
         healthcheck:
             test: rabbitmq-diagnostics -q ping
-            interval: 30s
-            timeout: 30s
-            retries: 3
+            interval: 10s
+            timeout: 10s
+            retries: 20
         networks:
             - aspcore-network
     message:
@@ -27,7 +30,8 @@ services:
             context: .
             dockerfile: Message_Service\Dockerfile
         depends_on:
-            -   rabbitmq
+            rabbitmq:
+                condition: service_healthy
         networks:
             - aspcore-network
         
