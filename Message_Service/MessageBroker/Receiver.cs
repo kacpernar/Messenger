@@ -9,14 +9,16 @@ public class Receiver : IHostedService
 {
     private readonly IMessageHolder _messageHolder;
     private readonly IMessageProducer _messageProducer;
+    private readonly ILogger<Receiver> _logger;
     private ConnectionFactory Factory { get; set; }
     private IConnection Connection { get; set; }
     private readonly IModel _channel;
 
-    public Receiver(IMessageHolder messageHolder, IMessageProducer messageProducer)
+    public Receiver(IMessageHolder messageHolder, IMessageProducer messageProducer, ILogger<Receiver> logger)
     {
         _messageHolder = messageHolder;
         _messageProducer = messageProducer;
+        _logger = logger;
         //Factory = new ConnectionFactory { HostName = "localhost" };
         Factory = new ConnectionFactory { HostName = "rabbitmq" };
         Connection = Factory.CreateConnection();
@@ -37,6 +39,7 @@ public class Receiver : IHostedService
             var jsonString = Encoding.UTF8.GetString(body);
             var message = JsonSerializer.Deserialize<Message>(jsonString);
             if (message == null) return;
+            _logger.LogInformation(message: $"Received message: {message.Text}");
             switch (message.MessageStatus)
             {
                 case MessageStatus.None:

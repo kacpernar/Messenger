@@ -5,13 +5,10 @@ namespace Messenger.Blazor.Services;
 
 public class MessageHolder : IMessageHolder
 {
-    private readonly IUserService _userService;
-
-    public MessageHolder(NavigationManager navigationManager, EventService eventService, IUserService userService)
+    public MessageHolder(NavigationManager navigationManager, EventService eventService, IUserService userService, ILogger<MessageHolder> logger)
     {
-        _userService = userService;
         var hubConnection = new HubConnectionBuilder()
-            .WithUrl(navigationManager.ToAbsoluteUri("/chathub"))
+            .WithUrl("http://localhost/chatHub")
             .Build();
 
         hubConnection.On<Message>("ReceiveMessage", async message =>
