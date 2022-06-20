@@ -7,7 +7,7 @@ services:
         ports:
             - "5002:80"
         depends_on:
-            - auth
+            - identityserver
             - message
             - rabbitmq
         networks:
@@ -31,7 +31,8 @@ services:
         networks:
             - aspcore-network
         
-    auth:
+    identityserver:
+        image: identityserver
         build:
             context: .
             dockerfile: IdentityServer\Dockerfile
