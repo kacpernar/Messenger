@@ -11,15 +11,17 @@ namespace Messenger;
 public class Receiver : BackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
+    private readonly ILogger<Receiver> _logger;
     private ConnectionFactory Factory { get; set; }
     private IConnection Connection { get; set; }
     private readonly IModel _channel;
 
     private string QueueName { get; set; }
 
-    public Receiver(IServiceProvider serviceProvider)
+    public Receiver(IServiceProvider serviceProvider, ILogger<Receiver> logger)
     {
         _serviceProvider = serviceProvider;
+        _logger = logger;
         //Factory = new ConnectionFactory { HostName = "localhost" };
         Factory = new ConnectionFactory { HostName = "rabbitmq" };
         Connection = Factory.CreateConnection();
@@ -41,6 +43,7 @@ public class Receiver : BackgroundService
             var jsonString = Encoding.UTF8.GetString(body);
             var message = JsonSerializer.Deserialize<Message>(jsonString);
             if (message == null) return;
+            _logger.LogInformation(message: $"Received message: {message.Text}");
             // Get the ChatHub from SignalR (using DI)
             var chatHub = (IHubContext<ChatHub>)_serviceProvider.GetRequiredService(typeof(IHubContext<ChatHub>));
             // Send message to all users in SignalR
